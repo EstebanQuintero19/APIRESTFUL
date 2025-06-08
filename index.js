@@ -20,32 +20,34 @@ app.get('/clientes', async (req, res) => {
     res.json(listaClientes);
 });
 
+app.post('/clientes', async (req, res) => {
+    const nuevoCliente = new modeloCliente({
+        documento : req.body.documento,
+        nombreCompleto : req.body.nombre,
+        fechaNacimiento : req.body.fecha,
+    });
+
+    try {
+        const clienteGuardado = await nuevoCliente.save();
+        res.status(201).json({ "mensaje": "Cliente creado exitosamente", cliente: clienteGuardado });
+    } catch (err) {
+        console.error("Error al guardar el cliente:", err);
+        res.status(400).json({ "mensaje": "Error al crear el cliente" });
+    }
+});
+
 app.get('/productos/:ref', async (req, res) => {
-    const productoEncontrado = await modeloProducto.findOne({ referencia: req.params.ref });
+    let productoEncontrado = await modeloProducto.findOne({ referencia: req.params.ref });
     if (productoEncontrado) {
         res.status(200).json(productoEncontrado);
     } else {
-        res.status(404).json({ error: 'No se encontró el producto' });
+        res.status(404).json({ "error": 'No se encontró el producto' });
     }
 });
 
 app.post('/productos', async (req, res) => {
     const nuevoProducto = {
-        referencia: req.body.referencia,
-        nombre: req.body.nombre,
-        descripcion: req.body.descripcion,
-        precio: req.body.precio,
-        stock: req.body.stock,
-        imagen: req.body.imagen,
-        habilitado: req.body.habilitado,
-    };
-    
-    const productoGuardado = await modeloProducto.create(nuevoProducto);
-    res.status(201).json({ mensaje: "Registro exitoso", producto: productoGuardado });
-});
-
-app.put('/productos/:ref', async (req, res) => {
-    const productoEditado = {
+        referencia: req.body.referenciaProducto,
         nombre: req.body.nombreProducto,
         descripcion: req.body.descripcionProducto,
         precio: req.body.precioProducto,
@@ -54,25 +56,49 @@ app.put('/productos/:ref', async (req, res) => {
         habilitado: true,
     };
     
-    const actualizacion = await modeloProducto.findOneAndUpdate(
-        { referencia: req.params.ref },
-        productoEditado,
-        { new: true }
-    );
-    
-    if (actualizacion) {
-        res.status(200).json({ mensaje: "Actualización exitosa", producto: actualizacion });
+    let Insercion = await modeloProducto.create(nuevoProducto);
+    if (Insercion) {
+        res.status(201).json({ "mensaje": "Producto creado exitosamente", producto: Insercion });
     } else {
-        res.status(404).json({ mensaje: "Producto no encontrado" });
+        res.status(400).json({ "mensaje": "Error al crear el producto" });
+    }
+});
+
+app.put('/productos/:ref', async (req, res) => {
+    const productoEditado = {
+        referencia: req.params.ref,
+        nombre: req.body.nombreProducto,
+        descripcion: req.body.descripcionProducto,
+        precio: req.body.precioProducto,
+        stock: req.body.stockProducto,
+        imagen: req.body.imagenProducto,
+        habilitado: true,
+    };
+    
+    try {
+        const actualizacion = await modeloProducto.findOneAndUpdate(
+            {referencia: req.params.ref}, 
+            productoEditado,
+            {new: true}
+        );
+        
+        if (actualizacion) {
+            res.status(200).json({ "mensaje": "Actualización exitosa", producto: actualizacion });
+        } else {
+            res.status(404).json({ "mensaje": "Producto no encontrado" });
+        }
+    } catch (err) {
+        console.error("Error al actualizar el producto:", err);
+        res.status(400).json({ "mensaje": "Error al actualizar el producto" });
     }
 });
 
 app.delete('/productos/:ref', async (req, res) => {
     const eliminacion = await modeloProducto.findOneAndDelete({ referencia: req.params.ref });
     if (eliminacion) {
-        res.status(200).json({ mensaje: "Producto eliminado exitosamente" });
+        res.status(200).json({ "mensaje": "Producto eliminado exitosamente" });
     } else {
-        res.status(404).json({ mensaje: "Producto no encontrado" });
+        res.status(404).json({ "mensaje": "Producto no encontrado" });
     }
 });
 
