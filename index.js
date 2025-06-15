@@ -22,9 +22,9 @@ app.get('/clientes', async (req, res) => {
 
 app.post('/clientes', async (req, res) => {
     const nuevoCliente = new modeloCliente({
-        documento : req.body.documento,
-        nombreCompleto : req.body.nombre,
-        fechaNacimiento : req.body.fecha,
+        documento: req.body.documento,
+        nombreCompleto: req.body.nombreCompleto,
+        fechaNacimiento: req.body.fechaNacimiento,
     });
 
     try {
@@ -32,7 +32,19 @@ app.post('/clientes', async (req, res) => {
         res.status(201).json({ "mensaje": "Cliente creado exitosamente", cliente: clienteGuardado });
     } catch (err) {
         console.error("Error al guardar el cliente:", err);
-        res.status(400).json({ "mensaje": "Error al crear el cliente" });
+        res.status(400).json({ "mensaje": "Error al crear el cliente", error: err.message });
+    }
+});
+
+
+//productos
+app.get('/productos', async (req, res) => {
+    try {
+        const productos = await modeloProducto.find();
+        res.status(200).json(productos);
+    } catch (err) {
+        console.error("Error al obtener los productos:", err);
+        res.status(500).json({ "mensaje": "Error al obtener los productos" });
     }
 });
 
@@ -58,7 +70,7 @@ app.post('/productos', async (req, res) => {
     
     let Insercion = await modeloProducto.create(nuevoProducto);
     if (Insercion) {
-        res.status(201).json({ "mensaje": "Producto creado exitosamente", producto: Insercion });
+        res.status(201).json(Insercion);
     } else {
         res.status(400).json({ "mensaje": "Error al crear el producto" });
     }
@@ -103,7 +115,7 @@ app.delete('/productos/:ref', async (req, res) => {
 });
 
 // Servidor
-const PORT = process.env.PORT || 9090;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto: ${PORT}`);
+
+app.listen(process.env.PORT || 9090, () => {
+    console.log(`Servidor corriendo en el puerto: ${process.env.PORT || 9090}`);
 });

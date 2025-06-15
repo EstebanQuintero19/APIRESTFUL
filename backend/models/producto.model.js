@@ -34,7 +34,8 @@ const schemaProducto = new mongoose.Schema({
         default: true
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    versionKey: false
 });
 
 const Producto = mongoose.model('Producto', schemaProducto);
