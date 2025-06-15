@@ -37,7 +37,8 @@ app.post('/clientes', async (req, res) => {
 });
 
 
-//productos
+//PRODUCTOS
+//producto--GET
 app.get('/productos', async (req, res) => {
     try {
         const productos = await modeloProducto.find();
@@ -48,6 +49,7 @@ app.get('/productos', async (req, res) => {
     }
 });
 
+//producto--byId
 app.get('/productos/:ref', async (req, res) => {
     let productoEncontrado = await modeloProducto.findOne({ referencia: req.params.ref });
     if (productoEncontrado) {
@@ -57,25 +59,31 @@ app.get('/productos/:ref', async (req, res) => {
     }
 });
 
+//producto--POST
 app.post('/productos', async (req, res) => {
-    const nuevoProducto = {
-        referencia: req.body.referenciaProducto,
-        nombre: req.body.nombreProducto,
-        descripcion: req.body.descripcionProducto,
-        precio: req.body.precioProducto,
-        stock: req.body.stockProducto,
-        imagen: req.body.imagenProducto,
-        habilitado: true,
-    };
-    
-    let Insercion = await modeloProducto.create(nuevoProducto);
-    if (Insercion) {
-        res.status(201).json(Insercion);
-    } else {
-        res.status(400).json({ "mensaje": "Error al crear el producto" });
+    try {
+        const nuevoProducto = {
+            referencia: req.body.referenciaProducto,
+            nombre: req.body.nombreProducto,
+            descripcion: req.body.descripcionProducto,
+            precio: req.body.precioProducto,
+            stock: req.body.stockProducto,
+            imagen: req.body.imagenProducto,
+            habilitado: true
+        };
+
+        const insercion = await modeloProducto.create(nuevoProducto);
+
+        res.status(201).json(insercion);
+
+    } catch (err) {
+        console.error('Error al crear el producto:', err.message);
+        res.status(400).json({ mensaje: 'Error al crear el producto', error: err.message });
     }
 });
 
+
+//producto--PUT
 app.put('/productos/:ref', async (req, res) => {
     const productoEditado = {
         referencia: req.params.ref,
@@ -86,14 +94,14 @@ app.put('/productos/:ref', async (req, res) => {
         imagen: req.body.imagenProducto,
         habilitado: true,
     };
-    
+
     try {
         const actualizacion = await modeloProducto.findOneAndUpdate(
-            {referencia: req.params.ref}, 
+            { referencia: req.params.ref },
             productoEditado,
-            {new: true}
+            { new: true }
         );
-        
+
         if (actualizacion) {
             res.status(200).json({ "mensaje": "Actualización exitosa", producto: actualizacion });
         } else {
@@ -105,6 +113,7 @@ app.put('/productos/:ref', async (req, res) => {
     }
 });
 
+//producto--DELETE
 app.delete('/productos/:ref', async (req, res) => {
     const eliminacion = await modeloProducto.findOneAndDelete({ referencia: req.params.ref });
     if (eliminacion) {
@@ -114,8 +123,8 @@ app.delete('/productos/:ref', async (req, res) => {
     }
 });
 
-// Servidor
 
+// Servidor
 app.listen(process.env.PORT || 9090, () => {
     console.log(`Servidor corriendo en el puerto: ${process.env.PORT || 9090}`);
 });
