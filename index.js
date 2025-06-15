@@ -20,19 +20,59 @@ app.get('/clientes', async (req, res) => {
     res.json(listaClientes);
 });
 
+
+//cliente--POST
 app.post('/clientes', async (req, res) => {
     const nuevoCliente = new modeloCliente({
         documento: req.body.documento,
         nombreCompleto: req.body.nombreCompleto,
         fechaNacimiento: req.body.fechaNacimiento,
+        correo: req.body.correo
     });
 
     try {
         const clienteGuardado = await nuevoCliente.save();
-        res.status(201).json({ "mensaje": "Cliente creado exitosamente", cliente: clienteGuardado });
+        res.status(201).json({ 'mensaje': "Cliente creado exitosamente", cliente: clienteGuardado });
     } catch (err) {
         console.error("Error al guardar el cliente:", err);
-        res.status(400).json({ "mensaje": "Error al crear el cliente", error: err.message });
+        res.status(400).json({ 'mensaje': "Error al crear el cliente", error: err.message });
+    }
+});
+
+//cliente--PUT
+app.put('/clientes/:email', async (req, res) => {
+    /*const clienteEditado = {
+        documento: req.body.documento,
+        nombreCompleto: req.body.nombreCompleto,
+        fechaNacimiento: req.body.fechaNacimiento,
+        correo: req.body.correo
+    };*/
+    const clienteEditado = req.body;
+    try {
+        const resultado = await modeloCliente.findOneAndUpdate({ correo: req.params.email },clienteEditado,{ new: true });
+        if (resultado) {
+            res.status(200).json({ 'mensaje': "Cliente actualizado exitosamente", cliente: resultado });
+        } else {
+            res.status(404).json({ 'mensaje': "Cliente no encontrado" });
+        }
+    } catch (err) {
+        console.error("Error al actualizar el cliente:", err);
+        res.status(400).json({ 'mensaje': "Error al actualizar el cliente", error: err.message });
+    }
+});
+
+//cliente--DELETE
+app.delete('/clientes/:email', async (req, res) => {
+    try {
+        const resultado = await modeloCliente.findOneAndDelete({ correo: req.params.email });
+        if (resultado) {
+            res.status(200).json({ 'mensaje': "Cliente eliminado exitosamente" });
+        } else {
+            res.status(404).json({ 'mensaje': "Cliente no encontrado" });
+        }
+    } catch (err) {
+        console.error("Error al eliminar el cliente:", err);
+        res.status(500).json({ 'mensaje': "Error al eliminar el cliente", error: err.message });
     }
 });
 
@@ -45,7 +85,7 @@ app.get('/productos', async (req, res) => {
         res.status(200).json(productos);
     } catch (err) {
         console.error("Error al obtener los productos:", err);
-        res.status(500).json({ "mensaje": "Error al obtener los productos" });
+        res.status(500).json({ 'mensaje': "Error al obtener los productos" });
     }
 });
 
@@ -82,7 +122,6 @@ app.post('/productos', async (req, res) => {
     }
 });
 
-
 //producto--PUT
 app.put('/productos/:ref', async (req, res) => {
     const productoEditado = {
@@ -96,22 +135,17 @@ app.put('/productos/:ref', async (req, res) => {
     };
 
     try {
-        const actualizacion = await modeloProducto.findOneAndUpdate(
-            { referencia: req.params.ref },
-            productoEditado,
-            { new: true }
-        );
-
+        const actualizacion = await modeloProducto.findOneAndUpdate({ referencia: req.params.ref }, productoEditado,{ new: true });
         if (actualizacion) {
-            res.status(200).json({ "mensaje": "Actualización exitosa", producto: actualizacion });
+            res.status(200).json({ 'mensaje': "Actualización exitosa", producto: actualizacion });
         } else {
-            res.status(404).json({ "mensaje": "Producto no encontrado" });
+            res.status(404).json({ 'mensaje': "Producto no encontrado" });
         }
     } catch (err) {
         console.error("Error al actualizar el producto:", err);
-        res.status(400).json({ "mensaje": "Error al actualizar el producto" });
+        res.status(400).json({ 'mensaje': "Error al actualizar el producto" });
     }
-});
+});                        
 
 //producto--DELETE
 app.delete('/productos/:ref', async (req, res) => {

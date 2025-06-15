@@ -16,7 +16,13 @@ const schemaCliente = new mongoose.Schema({
     fechaNacimiento: {
         type: Date,
         required: true
-    }
+    },
+    correo: {
+        type: String,
+        required: true,
+        unique: true,
+        match: [/^\S+@\S+\.\S+$/, 'El correo debe ser válido']
+    },
 }, {
     versionKey: false
 });
